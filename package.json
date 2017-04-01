@@ -1,0 +1,15 @@
+{
+  "name": "numlinebot",
+  "version": "1.0.0",
+  "description": "Number Line Bot Controller",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "http": "*",
+    "express": "*"
+  }
+}
