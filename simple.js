@@ -3,6 +3,7 @@ var cors = require('cors')
 var http      = require('http');
 var https     = require('https');
 var express   = require('express');
+//var gpio   = require('pi-gpio');
 var gpio   = require('rpi-gpio');
 
 var privateKey  = fs.readFileSync('numlinebot-key.pem', 'utf8');
@@ -13,13 +14,18 @@ var app = express();
 app.use(cors())
 app.use(express.static(__dirname));
 
-
+// set-up PIN reference (BCM)
+gpio.setMode(gpio.MODE_RPI)
 
 // set-up GPIO pins for I/O
-gpio.setup(11,gpio.DIR_OUT);
-gpio.setup(12,gpio.DIR_OUT);
-gpio.setup(15,gpio.DIR_OUT);
-gpio.setup(16,gpio.DIR_OUT);
+gpio.setup(16,gpio.DIR_OUT,write);
+
+function write(){
+ console.log("test-1")
+ gpio.write(16,false,function(err){
+ if (err) throw err;
+ });
+}
 
 // pin states for both motors based on L293 driver
 // http://www.rakeshmondal.info/L293D-Motor-Driver
@@ -34,18 +40,18 @@ var forward_pins = [
 
 // Backward (Anti-clockwise)
 var backward_pins = [
-  {pin: 11, state:  false},
-  {pin: 12, state:  true},
-  {pin: 15, state:  false},
-  {pin: 16, state:  true}
+  {pin: 0, state:  false},
+  {pin: 2, state:  true},
+  {pin: 21, state:  false},
+  {pin: 22, state:  true}
 ];
 
 // Stop moving
 var stop_pins = [
-  {pin: 11, state:  false},
-  {pin: 12, state:  false},
-  {pin: 15, state:  false},
-  {pin: 16, state:  false}
+  {pin: 0, state:  false},
+  {pin: 2, state:  false},
+  {pin: 21, state:  false},
+  {pin: 22, state:  false}
 ];
 
 // Duration of rotation for each step
@@ -116,15 +122,16 @@ function stop() {
 
 
 function set_state(pin_states) {
-  for (var i = 0; i < pin_states.length; ++i) {
-    var pin = pin_states[i];
-    // set the gpio pin state
-    gpio.write(pin.pin,pin.state);
-  }
+  
+    gpio.write(2,true,function(err){
+    if(err) throw err;
+    });
+  
 }
 
 
 process.on('SIGINT', function() {
+  gpio.destroy();
   console.log("\nGracefully shutting down from SIGINT (Ctrl+C)");
   process.exit();
 });
